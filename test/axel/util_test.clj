@@ -9,10 +9,10 @@
 
 (deftest get-start-offset-test
   (testing
-    (is (= (get-start-offset 4 0) 0))
-    (is (= (get-start-offset 4 1) 4))
-    (is (= (get-start-offset 4 2) 8))
-    (is (= (get-start-offset 4 3) 12))))
+    (is (= (get-start-offset 85 0 4) 0))
+    (is (= (get-start-offset 85 1 4) 21))
+    (is (= (get-start-offset 85 2 4) 42))
+    (is (= (get-start-offset 85 3 4) 63))))
 
 (deftest get-end-offset-test
   (testing

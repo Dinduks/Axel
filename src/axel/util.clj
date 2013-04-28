@@ -19,8 +19,8 @@
     []))
 
 (defn get-start-offset
-  [len n]
-  (* n len))
+  [lentotal n ntotal]
+  (* n (int (Math/floor (/ lentotal ntotal)))))
 
 (defn get-end-offset
   [len lentotal n ntotal]
