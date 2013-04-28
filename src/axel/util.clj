@@ -17,3 +17,13 @@
     (int (Math/floor (/ size nparts)))
     (- nparts 1)
     []))
+
+(defn get-start-offset
+  [len n]
+  (* n len))
+
+(defn get-end-offset
+  [len lentotal n ntotal]
+  (cond
+    (= (+ n 1) ntotal) lentotal
+    :else (* (+ n 1) len)))
