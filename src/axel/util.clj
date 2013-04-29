@@ -1,4 +1,7 @@
-(ns axel.util)
+(ns axel.util
+  (:import (java.nio.channels FileChannel)
+           (java.nio.file Paths StandardOpenOption)
+           (java.nio ByteBuffer)))
 
 (defn get-parts-size-step
   [rest_ part-size iteration acc]
@@ -27,3 +30,11 @@
   (cond
     (= (+ n 1) ntotal) lentotal
     :else (* (+ n 1) len)))
+
+(defn alloc-disk-space
+  [dest size]
+  (let [file-channel (FileChannel/open (Paths/get dest (into-array [""]))
+                                       (into-array [StandardOpenOption/CREATE
+                                                    StandardOpenOption/WRITE
+                                                    StandardOpenOption/SPARSE]))]
+    (. file-channel write (ByteBuffer/allocate size))))

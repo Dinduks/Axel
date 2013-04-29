@@ -14,13 +14,15 @@
 
 (defn save-to-disk
   [i fut]
-  fut)
+  :body @fut)
 
 (defn -main
   [& args]
-  (let [url "http://samy.dindane.com/samy"
+  (let [dest "/tmp/samy"
+        url "http://samy.dindane.com/samy"
         headers (:headers @(client/get url))
         cont-len (int (read-string (get headers :content-length)))
         parts-size (get-parts-size cont-len 4)
         futures (map-indexed (create-futures url cont-len) parts-size)]
+    (alloc-disk-space dest cont-len)
     (map-indexed save-to-disk futures)))
