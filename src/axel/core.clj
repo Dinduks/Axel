@@ -2,19 +2,22 @@
   (:require [org.httpkit.client :as client]
             [axel.util :refer :all]))
 
-(defn create-futures
+(defn create-promises
   [url cont-len]
   (fn
     [i x]
-    (let [options {:headers { "Range" (format
-                                        "bytes=%d-%d"
-                                        (get-start-offset cont-len i 4)
-                                        (- (get-end-offset x cont-len i 4) 1))}}]
-      (client/get url options))))
+    (let [start-offset (get-start-offset cont-len i 4)
+          end-offset   (- (get-end-offset x cont-len i 4) 1)
+          options      {:headers { "Range" (format "bytes=%d-%d"
+                                                   start-offset
+                                                   end-offset)}}]
+      {:promise (client/get url options)
+       :start-offset start-offset
+       :end-offset end-offset})))
 
 (defn save-to-disk
-  [i fut]
-  :body @fut)
+  [i promises-hash]
+  :body @(get promises-hash :promise))
 
 (defn -main
   [& args]
@@ -23,6 +26,6 @@
         headers (:headers @(client/get url))
         cont-len (int (read-string (get headers :content-length)))
         parts-size (get-parts-size cont-len 4)
-        futures (map-indexed (create-futures url cont-len) parts-size)]
+        promises (map-indexed (create-promises url cont-len) parts-size)]
     (alloc-disk-space dest cont-len)
-    (map-indexed save-to-disk futures)))
+    (map-indexed save-to-disk promises)))
