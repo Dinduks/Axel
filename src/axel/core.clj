@@ -12,7 +12,7 @@
           options      {:headers {"Range" (format "bytes=%d-%d"
                                                   start-offset
                                                   end-offset)
-                                   "Accept-Encoding" ""}}]
+                                  "Accept-Encoding" ""}}]
       {:promise (client/get url options)
        :start-offset start-offset
        :index i})))
@@ -32,9 +32,13 @@
   [& args]
   (let [dest "/tmp/samy"
         url "http://samy.dindane.com/samy"
-        headers (:headers @(client/head url {:headers {"Accept-Encoding" ""}}))
-        cont-len (int (read-string (get headers :content-length)))
-        parts-size (get-parts-size cont-len 4)
-        promises (map-indexed (create-promises url cont-len dest) parts-size)
-        file-channel (get-allocated-file-channel dest cont-len)] ; this shit's blocking
-    (pmap (save-to-disk file-channel) promises)))
+        response @(client/head url {:headers {"Accept-Encoding" ""}})]
+    (cond
+      (= (:status response) 404) (println "Error: File not found (404)")
+      (= (:status response) 403) (println "Error: File forbidden (403)")
+      :else (let [headers (:headers response)
+                  cont-len (int (read-string (get headers :content-length)))
+                  parts-size (get-parts-size cont-len 4)
+                  promises (map-indexed (create-promises url cont-len dest) parts-size)
+                  file-channel (get-allocated-file-channel dest cont-len)] ; this shit's blocking
+              (pmap (save-to-disk file-channel) promises)))))
