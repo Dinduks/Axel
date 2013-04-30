@@ -36,5 +36,5 @@
         cont-len (int (read-string (get headers :content-length)))
         parts-size (get-parts-size cont-len 4)
         promises (map-indexed (create-promises url cont-len dest) parts-size)
-        file-channel (alloc-disk-space dest cont-len)] ; this shit's blocking
+        file-channel (get-allocated-file-channel dest cont-len)] ; this shit's blocking
     (pmap (save-to-disk file-channel) promises)))

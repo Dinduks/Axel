@@ -31,7 +31,7 @@
     (= (+ n 1) ntotal) lentotal
     :else (* (+ n 1) len)))
 
-(defn alloc-disk-space
+(defn get-allocated-file-channel
   [dest size]
   (let [file-channel (FileChannel/open (Paths/get dest (into-array [""]))
                                        (into-array [StandardOpenOption/CREATE
