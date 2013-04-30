@@ -37,4 +37,5 @@
                                        (into-array [StandardOpenOption/CREATE
                                                     StandardOpenOption/WRITE
                                                     StandardOpenOption/SPARSE]))]
-    (. file-channel write (ByteBuffer/allocate size))))
+    (. file-channel write (ByteBuffer/allocate size))
+    file-channel))
