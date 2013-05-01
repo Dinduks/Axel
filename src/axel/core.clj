@@ -10,19 +10,22 @@
 
 (defn -main
   [& args]
-  (let [dest "/tmp/samy"
-        url "http://samy.dindane.com/samy"
-        response @(client/head url {:headers {"Accept-Encoding" ""}})]
-    (cond
-      (= (:status response) 404) (println "Error: File not found (404)")
-      (= (:status response) 403) (println "Error: File forbidden (403)")
-      :else (let [headers (:headers response)
-                  cont-len (int (read-string (get headers :content-length)))
-                  parts-size (get-parts-size cont-len 4)
-                  promises (map-indexed (create-promises url cont-len dest) parts-size)
-                  file-channel-fut (get-allocated-file-channel dest cont-len)
-                  ƒ (download-file file-channel-fut)]
-              (pmap ƒ promises)))))
+  (cond
+    (not= (count args) 2) (println "You need to specify the file's URL then the"
+                                  "destination directory.")
+    :else (let [url (first args)
+                dest (nth args 1)
+                response @(client/head url {:headers {"Accept-Encoding" ""}})]
+            (cond
+              (= (:status response) 404) (println "Error: File not found (404)")
+              (= (:status response) 403) (println "Error: File forbidden (403)")
+              :else (let [headers (:headers response)
+                          cont-len (int (read-string (get headers :content-length)))
+                          parts-size (get-parts-size cont-len 4)
+                          promises (map-indexed (create-promises url cont-len dest) parts-size)
+                          file-channel-fut (get-allocated-file-channel dest cont-len)
+                          ƒ (download-file file-channel-fut)]
+                      (pmap ƒ promises))))))
 
 (defn create-promises
   [url cont-len dest]
