@@ -21,13 +21,14 @@
   [promises-hash content-in-bytes]
   (fn
     [fc-fut]
-    (let [fc @fc-fut
-          byte-buffer (ByteBuffer/wrap content-in-bytes)
-          start-offset (:start-offset promises-hash)]
-      (. fc write byte-buffer start-offset)
-      ;; TODO: Make the message below appear
-      (println "Finished writing part    " (inc (:index promises-hash)) "to disk.")
-      ())))
+    (future
+      (let [fc @fc-fut
+            byte-buffer (ByteBuffer/wrap content-in-bytes)
+            start-offset (:start-offset promises-hash)]
+        (. fc write byte-buffer start-offset)
+        ;; TODO: Make the message below appear
+        (println "Finished writing part    " (inc (:index promises-hash)) "to disk.")
+        ()))))
 
 (defn save-to-disk
   [file-channel-fut]
