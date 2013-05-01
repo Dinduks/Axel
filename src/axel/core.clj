@@ -22,11 +22,13 @@
   (fn
     [promises-hash]
     (let [content-in-bytes (. (:body @(:promise promises-hash)) getBytes)
-          ƒ (fn [fc] ((. fc write (ByteBuffer/wrap content-in-bytes)
-                                  (:start-offset promises-hash))))]
+          ƒ (fn [fc] (. fc write (ByteBuffer/wrap content-in-bytes) (:start-offset promises-hash))
+                      (println "Finished writing part    "
+                               (inc (:index promises-hash))
+                               "to disk."))]
       (println "Finished downloading part" (inc (:index promises-hash)))
       (map ƒ file-channel-fut)
-      (println "Finished writing part    " (inc (:index promises-hash)) "to disk."))))
+      ()))) ; TOOD: Remove the last useless s-exp
 
 (defn -main
   [& args]
