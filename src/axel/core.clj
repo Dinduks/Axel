@@ -18,14 +18,14 @@
        :index i})))
 
 (defn save-to-disk
-  [file-channel]
+  [file-channel-fut]
   (fn
     [promises-hash]
-    (let [content-in-bytes (. (:body @(:promise promises-hash)) getBytes)]
+    (let [content-in-bytes (. (:body @(:promise promises-hash)) getBytes)
+          ƒ (fn [fc] ((. fc write (ByteBuffer/wrap content-in-bytes)
+                                  (:start-offset promises-hash))))]
       (println "Finished downloading part" (inc (:index promises-hash)))
-      (. file-channel write
-         (ByteBuffer/wrap content-in-bytes)
-         (:start-offset promises-hash))
+      (map ƒ file-channel-fut)
       (println "Finished writing part    " (inc (:index promises-hash)) "to disk."))))
 
 (defn -main
@@ -40,5 +40,5 @@
                   cont-len (int (read-string (get headers :content-length)))
                   parts-size (get-parts-size cont-len 4)
                   promises (map-indexed (create-promises url cont-len dest) parts-size)
-                  file-channel (get-allocated-file-channel dest cont-len)] ; this shit's blocking
-              (pmap (save-to-disk file-channel) promises)))))
+                  file-channel-fut (get-allocated-file-channel dest cont-len)]
+              (pmap (save-to-disk file-channel-fut) promises)))))

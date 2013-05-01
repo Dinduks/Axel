@@ -32,10 +32,12 @@
     :else (* (+ n 1) len)))
 
 (defn get-allocated-file-channel
+  "Allocates a file on the disk asynchronously
+   Returns a future containing a FileChannel object"
   [dest size]
   (let [file-channel (FileChannel/open (Paths/get dest (into-array [""]))
                                        (into-array [StandardOpenOption/CREATE
                                                     StandardOpenOption/WRITE
                                                     StandardOpenOption/SPARSE]))]
-    (. file-channel write (ByteBuffer/allocate size))
-    file-channel))
+    (future ((. file-channel write (ByteBuffer/allocate size))
+             file-channel))))
