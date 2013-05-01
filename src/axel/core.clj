@@ -17,17 +17,20 @@
        :start-offset start-offset
        :index i})))
 
+(defn save-to-disk-ƒ
+  [promises-hash content-in-bytes]
+  (fn
+    [fc]
+    (. fc write (ByteBuffer/wrap content-in-bytes) (:start-offset promises-hash))
+    (println "Finished writing part    " (inc (:index promises-hash)) "to disk.")))
+
 (defn save-to-disk
   [file-channel-fut]
   (fn
     [promises-hash]
-    (let [content-in-bytes (. (:body @(:promise promises-hash)) getBytes)
-          ƒ (fn [fc] (. fc write (ByteBuffer/wrap content-in-bytes) (:start-offset promises-hash))
-                      (println "Finished writing part    "
-                               (inc (:index promises-hash))
-                               "to disk."))]
+    (let [content-in-bytes (. (:body @(:promise promises-hash)) getBytes)]
       (println "Finished downloading part" (inc (:index promises-hash)))
-      (map ƒ file-channel-fut)
+      (map (save-to-disk-ƒ promises-hash content-in-bytes) file-channel-fut)
       ()))) ; TOOD: Remove the last useless s-exp
 
 (defn -main
