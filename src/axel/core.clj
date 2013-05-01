@@ -9,7 +9,8 @@
     [i x]
     (let [start-offset (get-start-offset cont-len i 4)
           end-offset   (- (get-end-offset x cont-len i 4) 1)
-          options      {:headers {"Range" (format "bytes=%d-%d"
+          options      {:as :byte-array
+                        :headers {"Range" (format "bytes=%d-%d"
                                                   start-offset
                                                   end-offset)
                                   "Accept-Encoding" ""}}]
@@ -34,7 +35,7 @@
   [file-channel-fut]
   (fn
     [promises-hash]
-    (let [content-in-bytes (. (:body @(:promise promises-hash)) getBytes)
+    (let [content-in-bytes (:body @(:promise promises-hash))
           ƒ (save-to-disk-ƒ promises-hash content-in-bytes)
           index (inc (:index promises-hash))]
       (println "Finished downloading part" index)
