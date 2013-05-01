@@ -22,6 +22,7 @@
   (fn
     [fc]
     (. fc write (ByteBuffer/wrap content-in-bytes) (:start-offset promises-hash))
+    ;; TODO: Make the message below appear
     (println "Finished writing part    " (inc (:index promises-hash)) "to disk.")))
 
 (defn save-to-disk
@@ -30,8 +31,8 @@
     [promises-hash]
     (let [content-in-bytes (. (:body @(:promise promises-hash)) getBytes)]
       (println "Finished downloading part" (inc (:index promises-hash)))
-      (map (save-to-disk-ƒ promises-hash content-in-bytes) file-channel-fut)
-      ()))) ; TOOD: Remove the last useless s-exp
+      (do (map (save-to-disk-ƒ promises-hash content-in-bytes) file-channel-fut))
+      ()))) ; TODO: Remove the last useless s-exp
 
 (defn -main
   [& args]
