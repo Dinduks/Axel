@@ -39,6 +39,7 @@
     (let [file-channel (FileChannel/open (Paths/get dest (into-array [""]))
                                          (into-array [StandardOpenOption/CREATE
                                                       StandardOpenOption/WRITE
-                                                      StandardOpenOption/SPARSE]))]
-      (. file-channel write (ByteBuffer/allocate size))
+                                                      StandardOpenOption/SPARSE]))
+          byte-buffer (ByteBuffer/allocate size)]
+      (. file-channel write byte-buffer)
       file-channel)))

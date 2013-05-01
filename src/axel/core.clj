@@ -21,17 +21,22 @@
   [promises-hash content-in-bytes]
   (fn
     [fc-fut]
-    (. @fc-fut write (ByteBuffer/wrap content-in-bytes) (:start-offset promises-hash))
-    ;; TODO: Make the message below appear
-    (println "Finished writing part    " (inc (:index promises-hash)) "to disk.")))
+    (let [fc @fc-fut
+          byte-buffer (ByteBuffer/wrap content-in-bytes)
+          start-offset (:start-offset promises-hash)]
+      (. fc write byte-buffer start-offset)
+      ;; TODO: Make the message below appear
+      (println "Finished writing part    " (inc (:index promises-hash)) "to disk.")
+      ())))
 
 (defn save-to-disk
   [file-channel-fut]
   (fn
     [promises-hash]
     (let [content-in-bytes (. (:body @(:promise promises-hash)) getBytes)
-          ƒ (save-to-disk-ƒ promises-hash content-in-bytes)]
-      (println "Finished downloading part" (inc (:index promises-hash)))
+          ƒ (save-to-disk-ƒ promises-hash content-in-bytes)
+          index (inc (:index promises-hash))]
+      (println "Finished downloading part" index)
       (ƒ file-channel-fut)
       ()))) ; TODO: Remove the last useless s-exp
 
@@ -47,5 +52,6 @@
                   cont-len (int (read-string (get headers :content-length)))
                   parts-size (get-parts-size cont-len 4)
                   promises (map-indexed (create-promises url cont-len dest) parts-size)
-                  file-channel-fut (get-allocated-file-channel dest cont-len)]
-              (pmap (save-to-disk file-channel-fut) promises)))))
+                  file-channel-fut (get-allocated-file-channel dest cont-len)
+                  ƒ (save-to-disk file-channel-fut)]
+              (pmap ƒ promises)))))
