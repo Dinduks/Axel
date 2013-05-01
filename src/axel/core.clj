@@ -21,7 +21,7 @@
               (= (:status response) 403) (println "Error: File forbidden (403)")
               :else (let [headers (:headers response)
                           cont-len (int (read-string (get headers :content-length)))
-                          parts-size (get-parts-size cont-len 4)
+                          parts-size (get-parts-size cont-len 6)
                           promises (map-indexed (create-promises url cont-len dest) parts-size)
                           file-channel-fut (get-allocated-file-channel dest cont-len)
                           ƒ (download-file file-channel-fut)]
@@ -31,8 +31,8 @@
   [url cont-len dest]
   (fn
     [i x]
-    (let [start-offset (get-start-offset cont-len i 4)
-          end-offset   (- (get-end-offset x cont-len i 4) 1)
+    (let [start-offset (get-start-offset cont-len i 6)
+          end-offset   (- (get-end-offset x cont-len i 6) 1)
           options      {:as :byte-array
                         :headers {"Range" (format "bytes=%d-%d"
                                                   start-offset
